@@ -20,6 +20,7 @@ const SettingsView = () => import('@/pages/SettingsView.vue')
 const NotFoundView = () => import('@/pages/NotFoundView.vue')
 const MoodChainsView = () => import('@/pages/MoodChainsView.vue')
 const MoodChainView = () => import('@/pages/MoodChainView.vue')
+const OfflineView = () => import('@/pages/OfflineView.vue')
 
 const routes: RouteRecordRaw[] = [
   {
@@ -136,6 +137,15 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Recent',
       requiresAuth: true,
+    },
+  },
+  {
+    path: '/offline',
+    name: 'offline',
+    component: OfflineView,
+    meta: {
+      title: 'Offline',
+      layout: 'auth',
     },
   },
   {

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import Sidebar from './Sidebar.vue'
 import Header from './Header.vue'
 import MainContent from './MainContent.vue'
+import MobileDrawer from './MobileDrawer.vue'
 import { ToastContainer } from '@/components/ui'
 import { AudioPlayer } from '@/components/player'
 
@@ -23,5 +24,7 @@ onMounted(async () => {
     </MainContent>
     <ToastContainer />
     <AudioPlayer />
+    <!-- Mobile navigation drawer -->
+    <MobileDrawer />
   </div>
 </template>
