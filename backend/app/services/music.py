@@ -259,6 +259,7 @@ class MusicService:
 
         # Delete from database
         await self.db.delete(song)
+        await self.db.flush()
 
     async def increment_play_count(self, song_id: UUID, owner_id: UUID) -> Song:
         """Increment song play count.
