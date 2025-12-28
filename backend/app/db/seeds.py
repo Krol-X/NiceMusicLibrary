@@ -1,7 +1,7 @@
 """Database seed data for development and testing."""
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,8 +13,8 @@ from app.models import (
     Playlist,
     PlaylistSong,
     Song,
-    Tag,
     SongTag,
+    Tag,
     User,
 )
 from app.models.listening_history import ContextType
@@ -26,7 +26,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
     """Hash a password for storing."""
-    return pwd_context.hash(password)
+    hashed: str = pwd_context.hash(password)
+    return hashed
 
 
 async def seed_database(db: AsyncSession) -> None:
@@ -153,7 +154,7 @@ async def seed_database(db: AsyncSession) -> None:
         db.add(song_tag)
 
     # Create listening history
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i, song in enumerate(songs[:5]):
         history = ListeningHistory(
             id=uuid.uuid4(),
@@ -174,15 +175,17 @@ async def seed_database(db: AsyncSession) -> None:
 
 async def clear_database(db: AsyncSession) -> None:
     """Clear all data from the database."""
+    from sqlalchemy import text
+
     # Delete in reverse order of dependencies
-    await db.execute("TRUNCATE song_tags CASCADE")
-    await db.execute("TRUNCATE tags CASCADE")
-    await db.execute("TRUNCATE listening_history CASCADE")
-    await db.execute("TRUNCATE mood_chain_songs CASCADE")
-    await db.execute("TRUNCATE mood_chains CASCADE")
-    await db.execute("TRUNCATE playlist_songs CASCADE")
-    await db.execute("TRUNCATE playlists CASCADE")
-    await db.execute("TRUNCATE songs CASCADE")
-    await db.execute("TRUNCATE users CASCADE")
+    await db.execute(text("TRUNCATE song_tags CASCADE"))
+    await db.execute(text("TRUNCATE tags CASCADE"))
+    await db.execute(text("TRUNCATE listening_history CASCADE"))
+    await db.execute(text("TRUNCATE mood_chain_songs CASCADE"))
+    await db.execute(text("TRUNCATE mood_chains CASCADE"))
+    await db.execute(text("TRUNCATE playlist_songs CASCADE"))
+    await db.execute(text("TRUNCATE playlists CASCADE"))
+    await db.execute(text("TRUNCATE songs CASCADE"))
+    await db.execute(text("TRUNCATE users CASCADE"))
     await db.commit()
     print("Database cleared successfully!")

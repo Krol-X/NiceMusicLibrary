@@ -107,9 +107,7 @@ class MoodChainSong(Base, UUIDMixin):
         nullable=False,
     )
     position: Mapped[int] = mapped_column(Integer, nullable=False)
-    transition_weight: Mapped[float] = mapped_column(
-        Float, default=1.0, nullable=False
-    )
+    transition_weight: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
     added_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

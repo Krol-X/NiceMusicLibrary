@@ -1,5 +1,7 @@
 """Health check endpoints."""
 
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,13 +12,15 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Basic health check endpoint."""
     return {"status": "healthy"}
 
 
 @router.get("/health/db")
-async def health_check_db(db: AsyncSession = Depends(get_db)):
+async def health_check_db(
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
     """Database health check endpoint."""
     try:
         await db.execute(text("SELECT 1"))

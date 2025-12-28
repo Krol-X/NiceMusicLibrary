@@ -1,16 +1,18 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.auth import router as auth_router
 from app.api.health import router as health_router
 from app.core.config import settings
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan context manager."""
     # Startup
     yield
@@ -39,6 +41,9 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(health_router, prefix=settings.API_V1_PREFIX, tags=["health"])
+    app.include_router(
+        auth_router, prefix=f"{settings.API_V1_PREFIX}/auth", tags=["auth"]
+    )
 
     return app
 
