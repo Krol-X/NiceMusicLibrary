@@ -42,32 +42,41 @@ def get_test_database_url() -> str:
 # Create test database URL
 TEST_DATABASE_URL = get_test_database_url()
 
-# Create test engine
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    echo=False,
-)
-
-# Create test session factory
-TestSessionLocal = async_sessionmaker(
-    test_engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autoflush=False,
-)
-
 
 @pytest.fixture
 async def db_session():
-    """Create a test database session."""
-    async with test_engine.begin() as conn:
+    """Create a test database session.
+
+    Creates the engine inside the fixture to avoid event loop issues with asyncpg.
+    """
+    # Create engine inside fixture to use the correct event loop
+    engine = create_async_engine(
+        TEST_DATABASE_URL,
+        echo=False,
+    )
+
+    # Create session factory
+    session_factory = async_sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,
+    )
+
+    # Create tables
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async with TestSessionLocal() as session:
+    # Create and yield session
+    async with session_factory() as session:
         yield session
 
-    async with test_engine.begin() as conn:
+    # Drop tables
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+    # Dispose engine
+    await engine.dispose()
 
 
 @pytest.fixture
