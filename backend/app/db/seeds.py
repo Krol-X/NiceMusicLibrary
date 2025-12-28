@@ -1,7 +1,7 @@
 """Database seed data for development and testing."""
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,8 +13,8 @@ from app.models import (
     Playlist,
     PlaylistSong,
     Song,
-    Tag,
     SongTag,
+    Tag,
     User,
 )
 from app.models.listening_history import ContextType
@@ -153,7 +153,7 @@ async def seed_database(db: AsyncSession) -> None:
         db.add(song_tag)
 
     # Create listening history
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i, song in enumerate(songs[:5]):
         history = ListeningHistory(
             id=uuid.uuid4(),

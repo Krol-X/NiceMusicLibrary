@@ -4,17 +4,19 @@ Revision ID: 001
 Revises:
 Create Date: 2025-01-01 00:00:00.000000
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = "001"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -45,9 +47,7 @@ def upgrade() -> None:
             server_default="user",
         ),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default="true"),
-        sa.Column(
-            "last_login_at", sa.DateTime(timezone=True), nullable=True
-        ),
+        sa.Column("last_login_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -115,7 +115,9 @@ def upgrade() -> None:
     op.create_index("ix_songs_owner_album", "songs", ["owner_id", "album"])
     op.create_index("ix_songs_owner_genre", "songs", ["owner_id", "genre"])
     op.create_index("ix_songs_owner_play_count", "songs", ["owner_id", "play_count"])
-    op.create_index("ix_songs_owner_last_played", "songs", ["owner_id", "last_played_at"])
+    op.create_index(
+        "ix_songs_owner_last_played", "songs", ["owner_id", "last_played_at"]
+    )
     op.create_index("ix_songs_owner_favorite", "songs", ["owner_id", "is_favorite"])
 
     # Create playlists table
@@ -262,7 +264,9 @@ def upgrade() -> None:
         ),
     )
     op.create_index(
-        "ix_mood_chain_songs_position", "mood_chain_songs", ["mood_chain_id", "position"]
+        "ix_mood_chain_songs_position",
+        "mood_chain_songs",
+        ["mood_chain_id", "position"],
     )
     op.create_index(
         "ix_mood_chain_songs_chain_song",
