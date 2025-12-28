@@ -1,16 +1,27 @@
 // User types
 export interface User {
-  id: number
+  id: string
   email: string
   username: string
+  avatar_url?: string | null
   created_at: string
-  updated_at: string
+}
+
+export interface UserMe extends User {
+  preferences?: Record<string, unknown> | null
+  last_login_at?: string | null
+  is_active: boolean
 }
 
 export interface AuthTokens {
   access_token: string
   refresh_token: string
-  token_type: string
+  expires_in: number
+}
+
+export interface AuthResponse {
+  user: User
+  tokens: AuthTokens
 }
 
 export interface LoginCredentials {

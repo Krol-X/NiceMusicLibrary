@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 interface AppRouteMeta {
   requiresAuth?: boolean
   title?: string
+  layout?: 'default' | 'auth'
 }
 
 // Lazy-loaded page components
@@ -31,6 +32,7 @@ const routes: RouteRecordRaw[] = [
     component: LoginView,
     meta: {
       title: 'Sign In',
+      layout: 'auth',
     },
   },
   {
@@ -39,6 +41,7 @@ const routes: RouteRecordRaw[] = [
     component: RegisterView,
     meta: {
       title: 'Sign Up',
+      layout: 'auth',
     },
   },
   {

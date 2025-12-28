@@ -104,15 +104,20 @@ api.interceptors.response.use(
       }
 
       try {
-        const response = await axios.post<AuthTokens>(`${API_BASE_URL}/auth/refresh`, {
+        const response = await axios.post<{ access_token: string; expires_in: number }>(`${API_BASE_URL}/auth/refresh`, {
           refresh_token: refreshToken,
         })
-        const tokens = response.data
-        tokenManager.setTokens(tokens)
-        processQueue(null, tokens.access_token)
+        const newAccessToken = response.data.access_token
+        // Keep the existing refresh token since the endpoint only returns access_token
+        tokenManager.setTokens({
+          access_token: newAccessToken,
+          refresh_token: refreshToken,
+          expires_in: response.data.expires_in,
+        })
+        processQueue(null, newAccessToken)
 
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
         }
         return api(originalRequest)
       } catch (refreshError) {
