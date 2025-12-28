@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { ref } from 'vue'
 import App from '../App.vue'
 
 // Mock localStorage
@@ -27,10 +28,23 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+// Mock useRoute
+const mockRoute = ref({
+  meta: {},
+  path: '/',
+  name: 'home',
+})
+
+vi.mock('vue-router', () => ({
+  useRoute: () => mockRoute.value,
+  RouterView: { template: '<div class="router-view"></div>' },
+}))
+
 describe('App', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    mockRoute.value = { meta: {}, path: '/', name: 'home' }
   })
 
   it('renders properly', () => {
@@ -39,13 +53,15 @@ describe('App', () => {
         stubs: {
           RouterView: true,
           AppLayout: true,
+          AuthLayout: true,
         },
       },
     })
     expect(wrapper.exists()).toBe(true)
   })
 
-  it('uses AppLayout component', () => {
+  it('uses AppLayout component for non-auth routes', () => {
+    mockRoute.value = { meta: {}, path: '/', name: 'home' }
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -53,9 +69,32 @@ describe('App', () => {
           AppLayout: {
             template: '<div class="app-layout"><slot /></div>',
           },
+          AuthLayout: {
+            template: '<div class="auth-layout"><slot /></div>',
+          },
         },
       },
     })
     expect(wrapper.find('.app-layout').exists()).toBe(true)
+    expect(wrapper.find('.auth-layout').exists()).toBe(false)
+  })
+
+  it('uses AuthLayout component for auth routes', () => {
+    mockRoute.value = { meta: { layout: 'auth' }, path: '/login', name: 'login' }
+    const wrapper = mount(App, {
+      global: {
+        stubs: {
+          RouterView: true,
+          AppLayout: {
+            template: '<div class="app-layout"><slot /></div>',
+          },
+          AuthLayout: {
+            template: '<div class="auth-layout"><slot /></div>',
+          },
+        },
+      },
+    })
+    expect(wrapper.find('.auth-layout').exists()).toBe(true)
+    expect(wrapper.find('.app-layout').exists()).toBe(false)
   })
 })

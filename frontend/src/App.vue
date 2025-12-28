@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { AppLayout } from '@/components/layout'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import { AppLayout, AuthLayout } from '@/components/layout'
 import { useKeyboard } from '@/composables'
 
 // Initialize global keyboard shortcuts
 useKeyboard()
+
+const route = useRoute()
+
+const isAuthLayout = computed(() => route.meta?.layout === 'auth')
 </script>
 
 <template>
-  <AppLayout>
+  <component :is="isAuthLayout ? AuthLayout : AppLayout">
     <RouterView />
-  </AppLayout>
+  </component>
 </template>

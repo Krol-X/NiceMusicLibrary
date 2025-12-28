@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User, LoginCredentials, RegisterCredentials, AuthTokens } from '@/types'
+import type { User, UserMe, LoginCredentials, RegisterCredentials, AuthResponse, AuthTokens } from '@/types'
 import { apiService, tokenManager } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -19,9 +19,9 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await apiService.post<AuthTokens>('/auth/login', credentials)
-      tokenManager.setTokens(response.data)
-      await fetchUser()
+      const response = await apiService.post<AuthResponse>('/auth/login', credentials)
+      tokenManager.setTokens(response.data.tokens)
+      user.value = response.data.user
     } catch (e) {
       error.value = (e as { message: string }).message || 'Login failed'
       throw e
@@ -35,9 +35,9 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await apiService.post<AuthTokens>('/auth/register', credentials)
-      tokenManager.setTokens(response.data)
-      await fetchUser()
+      const response = await apiService.post<AuthResponse>('/auth/register', credentials)
+      tokenManager.setTokens(response.data.tokens)
+      user.value = response.data.user
     } catch (e) {
       error.value = (e as { message: string }).message || 'Registration failed'
       throw e
@@ -64,11 +64,37 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     try {
-      const response = await apiService.get<User>('/users/me')
+      const response = await apiService.get<UserMe>('/auth/me')
       user.value = response.data
     } catch {
       tokenManager.clearTokens()
       user.value = null
+    }
+  }
+
+  async function refreshToken(): Promise<void> {
+    const refreshTokenValue = tokenManager.getRefreshToken()
+    if (!refreshTokenValue) {
+      tokenManager.clearTokens()
+      user.value = null
+      return
+    }
+
+    try {
+      const response = await apiService.post<AuthTokens>('/auth/refresh', {
+        refresh_token: refreshTokenValue,
+      })
+      // The refresh endpoint returns only access_token and expires_in
+      // We keep the existing refresh token
+      tokenManager.setTokens({
+        access_token: response.data.access_token,
+        refresh_token: refreshTokenValue,
+        expires_in: response.data.expires_in,
+      })
+    } catch {
+      tokenManager.clearTokens()
+      user.value = null
+      throw new Error('Token refresh failed')
     }
   }
 
@@ -95,6 +121,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    refreshToken,
     initialize,
     clearError,
   }
