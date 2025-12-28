@@ -51,7 +51,7 @@ class User(Base, UUIDMixin, TimestampMixin):
         String(500),
         nullable=True,
     )
-    preferences: Mapped[dict] = mapped_column(
+    preferences: Mapped[dict[str, object]] = mapped_column(
         JSONB,
         nullable=True,
         default=dict,
