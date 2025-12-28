@@ -2,10 +2,25 @@
 import { ref, onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useRecommendationsStore } from '@/stores/recommendations'
+import { usePlayerStore } from '@/stores/player'
+import { useLibraryStore } from '@/stores/library'
+import { useStatsStore } from '@/stores/stats'
 import { Loader } from '@/components/ui'
+import { RecommendationSection, PersonalMixCard } from '@/components/recommendations'
+import type { Song } from '@/types'
 
 const authStore = useAuthStore()
+const recommendationsStore = useRecommendationsStore()
+const playerStore = usePlayerStore()
+const libraryStore = useLibraryStore()
+const statsStore = useStatsStore()
+
 const { isAuthenticated, currentUser } = storeToRefs(authStore)
+const { discoverSections, isLoadingDiscover, discoverError } = storeToRefs(recommendationsStore)
+const { currentTrack, isPlaying } = storeToRefs(playerStore)
+const { total: trackCount } = storeToRefs(libraryStore)
+const { overview } = storeToRefs(statsStore)
 
 const healthStatus = ref<string>('checking...')
 const isHealthLoading = ref(true)
@@ -17,7 +32,30 @@ const greeting = computed(() => {
   return 'Good evening'
 })
 
+const currentSongId = computed(() =>
+  isPlaying.value && currentTrack.value ? currentTrack.value.id : null
+)
+
+const totalHours = computed(() => {
+  if (!overview.value) return '--'
+  return Math.round(overview.value.total_duration_seconds / 3600)
+})
+
+// Get individual section data
+const longTimeNoListen = computed(() =>
+  discoverSections.value.find((s) => s.type === 'long_time_no_listen')
+)
+
+const basedOnFavorite = computed(() =>
+  discoverSections.value.find((s) => s.type === 'based_on_favorite')
+)
+
+const hiddenGems = computed(() =>
+  discoverSections.value.find((s) => s.type === 'hidden_gems')
+)
+
 onMounted(async () => {
+  // Health check
   try {
     const response = await fetch('/api/v1/health')
     const data = await response.json()
@@ -27,7 +65,34 @@ onMounted(async () => {
   } finally {
     isHealthLoading.value = false
   }
+
+  // Fetch data if authenticated
+  if (isAuthenticated.value) {
+    // Load recommendations
+    recommendationsStore.fetchDiscover().catch(() => {
+      // Error is stored in the store, no need to handle here
+    })
+
+    // Load library stats (track count)
+    if (trackCount.value === 0) {
+      libraryStore.fetchSongs(true).catch(() => {})
+    }
+
+    // Load listening stats
+    if (!overview.value) {
+      statsStore.fetchOverview().catch(() => {})
+    }
+  }
 })
+
+function handlePlaySong(song: Song) {
+  playerStore.play(song)
+}
+
+function handleClickSong(song: Song) {
+  // For now, just play the song
+  playerStore.play(song)
+}
 </script>
 
 <template>
@@ -36,7 +101,7 @@ onMounted(async () => {
     <div class="mb-8">
       <h1 class="text-h1 text-text-primary mb-2">
         <template v-if="isAuthenticated">
-          {{ greeting }}, {{ currentUser?.username || 'User' }}
+          {{ greeting }}, {{ currentUser?.username || 'User' }}!
         </template>
         <template v-else>
           Welcome to NiceMusicLibrary
@@ -74,7 +139,7 @@ onMounted(async () => {
           </div>
           <div>
             <p class="text-caption text-text-muted">Tracks</p>
-            <p class="text-h3 text-text-primary">--</p>
+            <p class="text-h3 text-text-primary">{{ trackCount || '--' }}</p>
           </div>
         </div>
       </div>
@@ -124,14 +189,74 @@ onMounted(async () => {
           </div>
           <div>
             <p class="text-caption text-text-muted">Hours Listened</p>
-            <p class="text-h3 text-text-primary">--</p>
+            <p class="text-h3 text-text-primary">{{ totalHours }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- API Status -->
-    <div class="card max-w-md">
+    <!-- Personal Mix Card (for authenticated users) -->
+    <div
+      v-if="isAuthenticated"
+      class="mb-8"
+    >
+      <PersonalMixCard />
+    </div>
+
+    <!-- Recommendations Sections (for authenticated users) -->
+    <template v-if="isAuthenticated">
+      <!-- Loading state -->
+      <div
+        v-if="isLoadingDiscover && discoverSections.length === 0"
+        class="flex h-48 items-center justify-center"
+      >
+        <Loader size="lg" />
+      </div>
+
+      <!-- Error state -->
+      <div
+        v-else-if="discoverError && discoverSections.length === 0"
+        class="mb-8 rounded-lg border border-dashed border-accent-error/30 p-8 text-center"
+      >
+        <p class="text-text-muted">{{ discoverError }}</p>
+      </div>
+
+      <!-- Recommendations sections -->
+      <template v-else>
+        <!-- Long Time No Listen -->
+        <RecommendationSection
+          v-if="longTimeNoListen && longTimeNoListen.items.length > 0"
+          :title="longTimeNoListen.title"
+          :songs="longTimeNoListen.items"
+          :current-song-id="currentSongId"
+          @play-song="handlePlaySong"
+          @click-song="handleClickSong"
+        />
+
+        <!-- Based on Favorite -->
+        <RecommendationSection
+          v-if="basedOnFavorite && basedOnFavorite.items.length > 0"
+          :title="basedOnFavorite.title"
+          :songs="basedOnFavorite.items"
+          :current-song-id="currentSongId"
+          @play-song="handlePlaySong"
+          @click-song="handleClickSong"
+        />
+
+        <!-- Hidden Gems -->
+        <RecommendationSection
+          v-if="hiddenGems && hiddenGems.items.length > 0"
+          :title="hiddenGems.title"
+          :songs="hiddenGems.items"
+          :current-song-id="currentSongId"
+          @play-song="handlePlaySong"
+          @click-song="handleClickSong"
+        />
+      </template>
+    </template>
+
+    <!-- API Status (moved to bottom) -->
+    <div class="card max-w-md mt-8">
       <h2 class="text-h3 text-text-primary mb-4">System Status</h2>
       <div class="flex items-center gap-3">
         <Loader
