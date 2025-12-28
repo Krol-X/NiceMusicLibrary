@@ -232,7 +232,7 @@ class StorageService:
         if not await aiofiles.os.path.exists(path):
             raise FileNotFoundError(f"File not found: {file_path}")
         stat = await aiofiles.os.stat(path)
-        return stat.st_size
+        return int(stat.st_size)
 
     async def read_file_range(
         self,
@@ -260,8 +260,8 @@ class StorageService:
         async with aiofiles.open(path, "rb") as f:
             await f.seek(start)
             if end is None:
-                return await f.read()
-            return await f.read(end - start)
+                return bytes(await f.read())
+            return bytes(await f.read(end - start))
 
     async def read_file(self, file_path: str) -> bytes:
         """Read entire file content.
@@ -280,7 +280,7 @@ class StorageService:
             raise FileNotFoundError(f"File not found: {file_path}")
 
         async with aiofiles.open(path, "rb") as f:
-            return await f.read()
+            return bytes(await f.read())
 
     def file_exists(self, file_path: str) -> bool:
         """Check if file exists (sync version for convenience).

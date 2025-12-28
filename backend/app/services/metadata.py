@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from mutagen import File as MutagenFile
 from mutagen.flac import FLAC
@@ -406,7 +407,7 @@ class MetadataExtractor:
 
         return metadata
 
-    def _extract_generic(self, audio: MutagenFile) -> AudioMetadata:
+    def _extract_generic(self, audio: Any) -> AudioMetadata:
         """Generic metadata extraction for unknown formats."""
         metadata = AudioMetadata()
 
@@ -419,7 +420,7 @@ class MetadataExtractor:
 
         return metadata
 
-    def _get_first(self, tags: dict, key: str) -> str | None:
+    def _get_first(self, tags: Any, key: str) -> str | None:
         """Get first value from a tag list.
 
         Args:
