@@ -38,10 +38,18 @@ export const useUiStore = defineStore('ui', () => {
     return isSidebarExpanded.value ? 260 : 72
   })
 
-  // Theme watcher - apply dark class to html
+  // Theme watcher - apply dark class to html with smooth transition
   watch(
     isDarkMode,
-    (dark) => {
+    (dark, oldDark) => {
+      // Add transition class for smooth theme change (only on actual change, not on initial load)
+      if (oldDark !== undefined) {
+        document.documentElement.classList.add('theme-transition')
+        setTimeout(() => {
+          document.documentElement.classList.remove('theme-transition')
+        }, 300)
+      }
+
       if (dark) {
         document.documentElement.classList.add('dark')
       } else {
@@ -55,6 +63,15 @@ export const useUiStore = defineStore('ui', () => {
   function setTheme(newTheme: Theme): void {
     theme.value = newTheme
     localStorage.setItem(THEME_STORAGE_KEY, newTheme)
+
+    // Update theme-color meta tag for mobile browsers
+    const themeColor = newTheme === 'dark' || (newTheme === 'system' && prefersDark.value)
+      ? '#1C1C1E'
+      : '#3B82F6'
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColor)
+    }
   }
 
   function toggleSidebar(): void {

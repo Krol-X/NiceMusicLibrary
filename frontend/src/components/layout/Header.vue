@@ -24,7 +24,13 @@ function toggleTheme() {
 }
 
 function toggleSidebar() {
-  uiStore.toggleSidebar()
+  if (isMobile.value) {
+    // On mobile, toggle the sidebar visibility (for the drawer)
+    uiStore.setSidebarVisible(!uiStore.isSidebarVisible)
+  } else {
+    // On desktop, toggle the sidebar expansion
+    uiStore.toggleSidebar()
+  }
 }
 
 function openSearch() {
