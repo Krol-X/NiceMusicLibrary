@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.songs import router as songs_router
 from app.core.config import settings
 
 
@@ -43,6 +44,9 @@ def create_app() -> FastAPI:
     app.include_router(health_router, prefix=settings.API_V1_PREFIX, tags=["health"])
     app.include_router(
         auth_router, prefix=f"{settings.API_V1_PREFIX}/auth", tags=["auth"]
+    )
+    app.include_router(
+        songs_router, prefix=f"{settings.API_V1_PREFIX}/songs", tags=["songs"]
     )
 
     return app
