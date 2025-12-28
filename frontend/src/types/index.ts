@@ -464,3 +464,65 @@ export interface RouteMeta extends Record<string, unknown> {
   requiresAuth?: boolean
   title?: string
 }
+
+// Recommendation types - matches backend schemas/recommendation.py
+
+export type MoodType = 'energetic' | 'calm' | 'focus'
+
+export type DiscoverSectionType = 'long_time_no_listen' | 'based_on_favorite' | 'hidden_gems'
+
+export type SearchType = 'all' | 'songs' | 'artists' | 'albums' | 'playlists'
+
+export interface SimilarSongItem {
+  song: Song
+  similarity_score: number
+  reasons: string[]
+}
+
+export interface SimilarSongsResponse {
+  source_song: Song
+  items: SimilarSongItem[]
+}
+
+export interface DiscoverSection {
+  type: DiscoverSectionType
+  title: string
+  items: Song[]
+}
+
+export interface DiscoverResponse {
+  sections: DiscoverSection[]
+}
+
+export interface PersonalMixResponse {
+  songs: Song[]
+  total_duration_seconds: number
+  mood: MoodType | null
+}
+
+export interface ArtistSearchResult {
+  name: string
+  song_count: number
+  songs: Song[]
+}
+
+export interface AlbumSearchResult {
+  name: string
+  artist: string | null
+  song_count: number
+  songs: Song[]
+}
+
+export interface PlaylistSearchResult {
+  id: string
+  name: string
+  song_count: number
+}
+
+export interface SearchResponse {
+  query: string
+  songs: Song[]
+  artists: ArtistSearchResult[]
+  albums: AlbumSearchResult[]
+  playlists: PlaylistSearchResult[]
+}

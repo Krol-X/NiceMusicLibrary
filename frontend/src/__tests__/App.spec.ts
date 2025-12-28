@@ -37,6 +37,13 @@ const mockRoute = ref({
 
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute.value,
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    go: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+  }),
   RouterView: { template: '<div class="router-view"></div>' },
 }))
 
@@ -54,6 +61,7 @@ describe('App', () => {
           RouterView: true,
           AppLayout: true,
           AuthLayout: true,
+          GlobalSearch: true,
         },
       },
     })
@@ -72,6 +80,7 @@ describe('App', () => {
           AuthLayout: {
             template: '<div class="auth-layout"><slot /></div>',
           },
+          GlobalSearch: true,
         },
       },
     })
@@ -91,6 +100,7 @@ describe('App', () => {
           AuthLayout: {
             template: '<div class="auth-layout"><slot /></div>',
           },
+          GlobalSearch: true,
         },
       },
     })
