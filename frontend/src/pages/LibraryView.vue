@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useLibraryStore, type SortField } from '@/stores/library'
+import { usePlayerStore } from '@/stores/player'
 import { useUiStore } from '@/stores/ui'
 import type { Song, SongUpdate } from '@/types'
 import { Button, Loader, ContextMenu, ConfirmDialog } from '@/components/ui'
@@ -17,6 +18,7 @@ import {
 
 // Stores
 const libraryStore = useLibraryStore()
+const playerStore = usePlayerStore()
 const uiStore = useUiStore()
 
 const {
@@ -33,7 +35,7 @@ const {
 
 // Local state
 const selectedSong = ref<Song | null>(null)
-const playingSongId = ref<string | null>(null)
+const playingSongId = computed(() => playerStore.currentTrack?.id || null)
 
 // Context menu state
 const contextMenuVisible = ref(false)
@@ -97,9 +99,7 @@ function handleSelect(song: Song) {
 }
 
 function handlePlay(song: Song) {
-  playingSongId.value = song.id
-  // TODO: Integrate with player store when available
-  uiStore.showInfo(`Now playing: ${song.title}`)
+  playerStore.play(song)
 }
 
 function handleFavorite(song: Song) {

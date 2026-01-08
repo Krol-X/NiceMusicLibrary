@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -61,3 +61,44 @@ async def get_current_user(
 
 # Type alias for dependency injection
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+async def get_current_user_query(
+    token: Annotated[str, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> User:
+    """Get the current authenticated user from query parameter.
+
+    Args:
+        token: JWT token.
+        db: Database session.
+
+    Returns:
+        Current authenticated user.
+
+    Raises:
+        HTTPException: If authentication fails.
+    """
+    auth_service = AuthService(db)
+
+    try:
+        user = await auth_service.get_current_user(token)
+        return user
+    except InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+        ) from e
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+        ) from e
+    except UserInactiveError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e),
+        ) from e
+
+
+CurrentUserQuery = Annotated[User, Depends(get_current_user_query)]

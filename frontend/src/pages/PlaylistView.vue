@@ -7,10 +7,12 @@ import { useUiStore } from '@/stores/ui'
 import type { Song, PlaylistUpdate } from '@/types'
 import { Button, Loader, ConfirmDialog } from '@/components/ui'
 import { PlaylistHeader, EditPlaylistModal } from '@/components/playlist'
+import {usePlayerStore} from "@/stores";
 
 const route = useRoute()
 const router = useRouter()
 const playlistStore = usePlaylistStore()
+const playerStore = usePlayerStore()
 const uiStore = useUiStore()
 
 const { currentPlaylist, isLoading, error } = storeToRefs(playlistStore)
@@ -92,8 +94,7 @@ async function handleDelete() {
 }
 
 function handlePlaySong(song: Song) {
-  // TODO: Integrate with player store
-  uiStore.showInfo(`Now playing: ${song.title}`)
+  playerStore.play(song)
 }
 
 async function handleRemoveSong(song: Song) {

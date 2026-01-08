@@ -166,7 +166,7 @@ export const usePlayerStore = defineStore('player', () => {
     const token = tokenManager.getAccessToken()
     // For audio elements, we need to include the token in the URL
     // since we can't set headers on the audio element directly
-    return `${baseUrl}/songs/${track.id}/stream?token=${token}`
+    return `${baseUrl}/songs/${track.id}/stream?token=${encodeURIComponent(token || '')}`
   }
 
   // Actions

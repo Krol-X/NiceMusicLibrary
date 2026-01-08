@@ -10,6 +10,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Header,
     Query,
     UploadFile,
     status,
@@ -17,7 +18,7 @@ from fastapi import (
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import CurrentUser
+from app.api.deps import CurrentUser, CurrentUserQuery
 from app.db.session import get_db
 from app.schemas.song import (
     SongBatchUploadResponse,
@@ -363,9 +364,9 @@ async def delete_song(
 )
 async def stream_song(
     song_id: UUID,
-    current_user: CurrentUser,
+    current_user: CurrentUserQuery,
     db: Annotated[AsyncSession, Depends(get_db)],
-    range: Annotated[str | None, Query(alias="Range")] = None,
+    range: Annotated[str | None, Header()] = None,
 ) -> Response:
     """Stream song audio.
 
