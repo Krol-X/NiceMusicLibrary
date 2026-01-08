@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 class UserRole(str, enum.Enum):
     """User roles enum."""
 
-    USER = "user"
-    ADMIN = "admin"
+    user = "user"
+    admin = "admin"
 
 
 class User(Base, UUIDMixin, TimestampMixin):
@@ -58,7 +58,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     )
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),
-        default=UserRole.USER,
+        default=UserRole.user,
         nullable=False,
     )
     is_active: Mapped[bool] = mapped_column(

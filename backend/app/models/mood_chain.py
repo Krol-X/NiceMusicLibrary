@@ -30,10 +30,10 @@ if TYPE_CHECKING:
 class TransitionStyle(str, enum.Enum):
     """Transition style enum."""
 
-    SMOOTH = "smooth"
-    RANDOM = "random"
-    ENERGY_FLOW = "energy_flow"
-    GENRE_MATCH = "genre_match"
+    smooth = "smooth"
+    random = "random"
+    energy_flow = "energy_flow"
+    genre_match = "genre_match"
 
 
 class MoodChain(Base, UUIDMixin, TimestampMixin):
@@ -67,7 +67,7 @@ class MoodChain(Base, UUIDMixin, TimestampMixin):
     )
     transition_style: Mapped[TransitionStyle] = mapped_column(
         Enum(TransitionStyle),
-        default=TransitionStyle.SMOOTH,
+        default=TransitionStyle.smooth,
         nullable=False,
     )
     auto_advance: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

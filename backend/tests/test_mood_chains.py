@@ -193,7 +193,7 @@ async def test_mood_chain(db_session: AsyncSession, test_user: User) -> MoodChai
         owner_id=test_user.id,
         name="Test Mood Chain",
         description="A test mood chain",
-        transition_style=TransitionStyle.SMOOTH,
+        transition_style=TransitionStyle.smooth,
     )
     db_session.add(mood_chain)
     await db_session.flush()
@@ -213,7 +213,7 @@ class TestMoodChainService:
         assert mood_chain.description == "My chain"
         assert mood_chain.owner_id == test_user.id
         assert mood_chain.song_count == 0
-        assert mood_chain.transition_style == TransitionStyle.SMOOTH
+        assert mood_chain.transition_style == TransitionStyle.smooth
         assert mood_chain.auto_advance is True
         assert mood_chain.auto_advance_delay_seconds == 10
 
@@ -265,14 +265,14 @@ class TestMoodChainService:
         """Test updating mood chain."""
         service = MoodChainService(db_session)
         data = MoodChainUpdate(
-            name="Updated Name", transition_style=TransitionStyle.RANDOM
+            name="Updated Name", transition_style=TransitionStyle.random
         )
         mood_chain = await service.update_mood_chain(
             test_mood_chain.id, test_user.id, data
         )
 
         assert mood_chain.name == "Updated Name"
-        assert mood_chain.transition_style == TransitionStyle.RANDOM
+        assert mood_chain.transition_style == TransitionStyle.random
 
     async def test_update_mood_chain_not_found(
         self, db_session: AsyncSession, test_user: User

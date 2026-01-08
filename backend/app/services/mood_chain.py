@@ -714,7 +714,7 @@ class MoodChainService:
             if mcs.song_id in transitions:
                 weight = transitions[mcs.song_id].weight
                 reason = "high transition weight"
-            elif mood_chain.transition_style == TransitionStyle.SMOOTH:
+            elif mood_chain.transition_style == TransitionStyle.smooth:
                 # Calculate similarity based on energy and valence
                 if (
                     song.energy is not None
@@ -727,7 +727,7 @@ class MoodChainService:
                     similarity = 1.0 - (energy_diff + valence_diff) / 2.0
                     weight = max(0.0, similarity)
                     reason = "similar energy/valence"
-            elif mood_chain.transition_style == TransitionStyle.ENERGY_FLOW:
+            elif mood_chain.transition_style == TransitionStyle.energy_flow:
                 # Prefer songs with slightly higher energy
                 if song.energy is not None and current_song.energy is not None:
                     if song.energy >= current_song.energy:
@@ -736,7 +736,7 @@ class MoodChainService:
                     else:
                         weight = 0.3
                         reason = "lower energy"
-            elif mood_chain.transition_style == TransitionStyle.GENRE_MATCH:
+            elif mood_chain.transition_style == TransitionStyle.genre_match:
                 # Prefer songs with same genre
                 if song.genre and current_song.genre:
                     if song.genre == current_song.genre:
@@ -745,7 +745,7 @@ class MoodChainService:
                     else:
                         weight = 0.3
                         reason = "different genre"
-            elif mood_chain.transition_style == TransitionStyle.RANDOM:
+            elif mood_chain.transition_style == TransitionStyle.random:
                 weight = random.random()
                 reason = "random selection"
 

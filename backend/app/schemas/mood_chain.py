@@ -64,7 +64,7 @@ class MoodChainBase(BaseModel):
 
     name: str = Field(max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    transition_style: TransitionStyle = TransitionStyle.SMOOTH
+    transition_style: TransitionStyle = TransitionStyle.smooth
     auto_advance: bool = True
     auto_advance_delay_seconds: int = Field(default=10, ge=1, le=60)
 

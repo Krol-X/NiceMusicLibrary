@@ -38,7 +38,7 @@ async def seed_database(db: AsyncSession) -> None:
         email="admin@example.com",
         username="admin",
         password_hash=hash_password("admin123"),
-        role=UserRole.ADMIN,
+        role=UserRole.admin,
         is_active=True,
         preferences={"theme": "dark", "language": "ru"},
     )
@@ -48,7 +48,7 @@ async def seed_database(db: AsyncSession) -> None:
         email="user@example.com",
         username="testuser",
         password_hash=hash_password("user123"),
-        role=UserRole.USER,
+        role=UserRole.user,
         is_active=True,
         preferences={"theme": "auto", "language": "en"},
     )
@@ -113,7 +113,7 @@ async def seed_database(db: AsyncSession) -> None:
         description="Relaxing music for the evening",
         mood_tags=["chill", "relaxing", "evening"],
         is_auto_generated=False,
-        transition_style=TransitionStyle.SMOOTH,
+        transition_style=TransitionStyle.smooth,
         song_count=3,
         play_count=5,
     )
