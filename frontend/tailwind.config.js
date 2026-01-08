@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         // Light theme colors
-        background: {
+        bg: {
           primary: 'var(--bg-primary)',
           secondary: 'var(--bg-secondary)',
           tertiary: 'var(--bg-tertiary)',
